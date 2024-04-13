@@ -1,9 +1,10 @@
+use crate::parser::misc;
+use crate::stories::fetch;
+use crate::stories::story::{NewsSource, Story};
 use serde_json::Value;
 use std::error::Error;
 
-use crate::stories::fetch;
-
-pub async fn fetch_html_body_for_top_stories() -> Result<String, Box<dyn Error>> {
+pub async fn fetch_html_body_for_top_stories() -> Result<Story, Box<dyn Error>> {
     let top_stories_json =
         fetch::fetch_json("https://hacker-news.firebaseio.com/v0/topstories.json").await?;
 
@@ -21,9 +22,15 @@ pub async fn fetch_html_body_for_top_stories() -> Result<String, Box<dyn Error>>
                 Ok(story_json) => {
                     if let Some(url) = story_json["url"].as_str() {
                         // Attempt to fetch the HTML body
-                        match fetch::get_html_body(url.to_string()).await {
+                        match fetch::get_html_body(url).await {
                             // Success
-                            Ok(html_body) => return Ok(html_body),
+                            Ok(html_body) => {
+                                return Ok(Story {
+                                    title: story_json["title"].to_string(), // story["content"]["title"].to_string(),
+                                    news_source: NewsSource::HackerNews,
+                                    content: misc::parse_html_body(&html_body).to_string(), // story["content"]["rendered"].to_string(),
+                                });
+                            }
                             // Try the next story upon error
                             Err(_) => continue,
                         }

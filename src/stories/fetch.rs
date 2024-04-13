@@ -8,7 +8,7 @@ pub async fn fetch_json(url: &str) -> Result<Value, Box<dyn Error>> {
     Ok(json)
 }
 
-pub async fn get_html_body(url: String) -> Result<String, reqwest::Error> {
+pub async fn get_html_body(url: &str) -> Result<String, reqwest::Error> {
     // Get HTML from url passed into function
     println!("{}", url);
     let response = reqwest::get(url).await?;

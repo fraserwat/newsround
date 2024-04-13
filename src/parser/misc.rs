@@ -11,7 +11,7 @@ pub fn parse_html_body(html: &str) -> String {
     document
         .select(&selector)
         .map(|element| {
-            if element.html().contains("<a") {
+            if element.html().starts_with("<a") {
                 " ".to_string()
             } else {
                 element.html()
