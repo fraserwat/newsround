@@ -1,4 +1,4 @@
-use crate::stories::fetch;
+use crate::parser::fetch;
 use crate::stories::story::{NewsSource, Story};
 use serde_json::Value;
 use std::error::Error;
@@ -13,12 +13,12 @@ pub async fn fetch_latest_story() -> Result<Story, Box<dyn Error>> {
             let is_article = story["content"]["rendered"].to_string().len() > 1000;
             if is_article {
                 return Ok(Story {
-                    title: story["content"]["title"].to_string(),
+                    title: story["title"]["rendered"].to_string(),
+                    url: story["link"].to_string(),
                     news_source: NewsSource::Novara,
-                    content: story["content"]["rendered"].to_string(),
+                    content: story["excerpt"]["rendered"].to_string(),
                 });
             } else {
-                print!("No story #n");
                 continue;
             };
         }

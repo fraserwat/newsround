@@ -1,5 +1,4 @@
-use crate::parser::misc;
-use crate::stories::fetch;
+use crate::parser::{fetch, misc};
 use crate::stories::story::{NewsSource, Story};
 use serde_json::Value;
 use std::error::Error;
@@ -16,6 +15,7 @@ pub async fn fetch_html_body_for_top_stories() -> Result<Story, Box<dyn Error>> 
                 story_id
             );
 
+            // TODO: Move this into its own function
             // Attempt to fetch the story JSON to get the URL
             match fetch::fetch_json(&hn_top_story_url).await {
                 // If we successfully get a story
@@ -26,9 +26,10 @@ pub async fn fetch_html_body_for_top_stories() -> Result<Story, Box<dyn Error>> 
                             // Success
                             Ok(html_body) => {
                                 return Ok(Story {
-                                    title: story_json["title"].to_string(), // story["content"]["title"].to_string(),
+                                    title: story_json["title"].to_string(),
+                                    url: hn_top_story_url,
                                     news_source: NewsSource::HackerNews,
-                                    content: misc::parse_html_body(&html_body).to_string(), // story["content"]["rendered"].to_string(),
+                                    content: misc::parse_html_body(&html_body).to_string(),
                                 });
                             }
                             // Try the next story upon error
