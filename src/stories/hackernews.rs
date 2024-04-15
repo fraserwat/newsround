@@ -26,6 +26,7 @@ pub async fn fetch_html_body_for_top_stories() -> Result<Story, Box<dyn Error>> 
                             // Success
                             Ok(html_body) => {
                                 return Ok(Story {
+                                    // TODO: Look at "struct update syntax" to clean this up.
                                     title: story_json["title"].to_string(),
                                     url: hn_top_story_url,
                                     news_source: NewsSource::HackerNews,

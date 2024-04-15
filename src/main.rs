@@ -1,12 +1,15 @@
+use crate::openai::summariser::summarise_article_text;
 use crate::stories::story::Story;
 use crate::stories::{bandcamp, hackernews, novara};
 use std::error::Error;
 
+mod openai;
 mod parser;
 mod stories;
 
 async fn construct_hackernews() -> Result<Story, Box<dyn Error>> {
     let hn = hackernews::fetch_html_body_for_top_stories().await?;
+    summarise_article_text(&hn).await?;
     Ok(hn)
 }
 
@@ -22,6 +25,8 @@ async fn construct_bandcamp() -> Result<Story, Box<dyn Error>> {
 
 #[tokio::main]
 async fn main() -> () {
+    // TODO: Reorganise the project with lib.rs type files
+    // TODO: If something is only being used within its module, can you leave it private?
     let hackernews_story: Story = construct_hackernews()
         .await
         .expect("Unable to fetch HackerNews story");
@@ -32,7 +37,7 @@ async fn main() -> () {
         .await
         .expect("Unable to fetch Album of the Day");
 
-    println!("HackerNews story: {}", hackernews_story.title);
-    println!("Novara story: {}", novara_story.title);
-    println!("Bandcamp Daily: {:?}", bandcamp_daily);
+    println!("\nHackerNews story: {:?}", hackernews_story);
+    println!("\nNovara story: {:?}", novara_story);
+    println!("\nBandcamp Daily: {:?}", bandcamp_daily);
 }

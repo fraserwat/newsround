@@ -5,18 +5,12 @@ pub fn parse_html_body(html: &str) -> String {
     let document = Html::parse_document(html);
 
     // Create a selector for the content blocks to strip them out and isolate them.
-    let selector = Selector::parse("h1, h2, p, strong, em, b, i").unwrap();
+    let selector = Selector::parse("p").unwrap();
 
     // Execute the selector on the HTML document
     document
         .select(&selector)
-        .map(|element| {
-            if element.html().starts_with("<a") {
-                " ".to_string()
-            } else {
-                element.html()
-            }
-        })
+        .map(|x| x.inner_html())
         .collect::<Vec<_>>()
-        .join("/n")
+        .join("\n")
 }
