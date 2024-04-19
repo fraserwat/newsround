@@ -1,43 +1,61 @@
 use crate::openai::summariser::summarise_article_text;
-use crate::stories::story::Story;
+use crate::stories::story::{NewsSource, Story};
 use crate::stories::{bandcamp, hackernews, novara};
-use std::error::Error;
 
 mod openai;
 mod parser;
 mod stories;
 
-async fn construct_hackernews() -> Result<Story, Box<dyn Error>> {
-    let hn = hackernews::fetch_html_body_for_top_stories().await?;
-    summarise_article_text(&hn).await?;
-    Ok(hn)
+// Define a generic default Story creator function
+fn default_story(source: NewsSource) -> Story {
+    Story {
+        title: "".to_string(),
+        url: "".to_string(),
+        news_source: source,
+        content: "".to_string(),
+    }
 }
 
-async fn construct_novara() -> Result<Story, Box<dyn Error>> {
-    let nm = novara::fetch_latest_story().await?;
-    Ok(nm)
+async fn construct_hackernews() -> Story {
+    hackernews::process_top_stories()
+        .await
+        .unwrap_or_else(|_| default_story(NewsSource::HackerNews))
 }
 
-async fn construct_bandcamp() -> Result<Story, Box<dyn Error>> {
-    let bc = bandcamp::fetch_bandcamp_daily().await?;
-    Ok(bc)
+async fn construct_novara() -> Story {
+    novara::fetch_latest_story()
+        .await
+        .unwrap_or_else(|_| default_story(NewsSource::Novara))
+}
+
+async fn construct_bandcamp() -> Story {
+    bandcamp::fetch_bandcamp_daily()
+        .await
+        .unwrap_or_else(|_| default_story(NewsSource::Bandcamp))
 }
 
 #[tokio::main]
-async fn main() -> () {
-    // TODO: Reorganise the project with lib.rs type files
-    // TODO: If something is only being used within its module, can you leave it private?
-    let hackernews_story: Story = construct_hackernews()
-        .await
-        .expect("Unable to fetch HackerNews story");
-    let novara_story: Story = construct_novara()
-        .await
-        .expect("Unable to fetch Novara Media story");
-    let bandcamp_daily: Story = construct_bandcamp()
-        .await
-        .expect("Unable to fetch Album of the Day");
+async fn main() {
+    let stories = vec![
+        construct_hackernews().await,
+        construct_novara().await,
+        construct_bandcamp().await,
+    ];
 
-    println!("\nHackerNews story: {:?}", hackernews_story);
-    println!("\nNovara story: {:?}", novara_story);
-    println!("\nBandcamp Daily: {:?}", bandcamp_daily);
+    let mut updated_stories = Vec::new();
+
+    for mut story in stories {
+        if let NewsSource::HackerNews = story.news_source {
+            match summarise_article_text(&story).await {
+                Ok(summary) => story.content = summary,
+                Err(_) => story.content = "No summary of article available.".to_string(),
+            }
+        }
+        updated_stories.push(story);
+    }
+
+    // Print stories after potentially updating HackerNews stories
+    for story in updated_stories {
+        println!("\nStory: {:?}", story);
+    }
 }

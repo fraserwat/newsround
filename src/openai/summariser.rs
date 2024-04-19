@@ -15,27 +15,14 @@ fn calculate_max_tokens(text: &str) -> usize {
         .min(chatgpt4_max_tokens as f64) as usize
 }
 
-pub async fn summarise_article_text(article: &Story) -> Result<String, Box<dyn Error>> {
+async fn open_ai_api_call(params: serde_json::Value) -> Result<String, Box<dyn Error>> {
     // Get OpenAI API Key
     let api_key = authenticate_openai_api_key().await?;
 
     // Create API Client
     let client = Client::new();
-    let params = serde_json::json!({
-        "model": "gpt-4-turbo",
-        "max_tokens": calculate_max_tokens(&article.content),
-        "messages": [
-            {
-                "role": "system",
-                "content": "You do not refer to 'the text' in any way. You write in a way like you are writing the blurb of a news story on that website's front page. Be professional but not high-brow, and don't use lots of uneccessary adverbs."
-            },
-            {
-                "role": "user",
-                "content": format!("Summarise the text in between the '```' backticks succinctly in an dispassionate tone you might expect from a newsreader:\n\n```{}```\n\nKeep the summary to 50-100 words, within the context of the title of this article, {}. Make sure your description matches the tone of the piece.", article.content.replace("\"", "'"), article.title.replace("\"", "'")),
-            }
-        ]
-    });
 
+    // Get response from API
     let response = client
         .post("https://api.openai.com/v1/chat/completions")
         .header("Content-Type", "application/json")
@@ -63,4 +50,52 @@ pub async fn summarise_article_text(article: &Story) -> Result<String, Box<dyn E
             .unwrap_or_else(|_| "Failed to get error message".to_string());
         Err(format!("Error {}: {}", status, error_message).into())
     }
+}
+
+pub async fn summarise_article_text(article: &Story) -> Result<String, Box<dyn Error>> {
+    let params = serde_json::json!({
+        "model": "gpt-4-turbo",
+        "max_tokens": calculate_max_tokens(&article.content),
+        "messages": [
+            {
+                "role": "system",
+                "content": "You do not refer to 'the text' in any way. You write in a way like you are writing the blurb of a news story on that website's front page. Be professional but not high-brow, and don't use lots of uneccessary adverbs."
+            },
+            {
+                "role": "user",
+                "content": format!("Summarise the text in between the '```' backticks succinctly in an dispassionate tone you might expect from a newsreader:\n\n```{}```\n\nKeep the summary to 50-100 words, within the context of the title of this article, {}. Make sure your description matches the tone of the piece.", article.content.replace("\"", "'"), article.title.replace("\"", "'")),
+            }
+        ]
+    });
+
+    open_ai_api_call(params).await
+}
+
+pub async fn generate_email_subject(titles: Vec<&str>) -> Result<String, Box<dyn Error>> {
+    let params = serde_json::json!({
+        "model": "gpt-4-turbo",
+        "max_tokens": 100,
+        "messages": [
+            {
+                "role": "system",
+                "content": "Optimise for brevity. Only output three words which summarise the topics. Do not give any other output."
+            },
+            {
+                "role": "user",
+                "content": format!("Give a three word summary of the following titles\n\n\"{}\".\n\nIf there are more than three titles, ignore one at random. Remember, one line, three words. That's it!", format_titles_with_numbering(titles)),
+            }
+        ]
+    });
+
+    open_ai_api_call(params).await
+}
+
+fn format_titles_with_numbering(strings: Vec<&str>) -> String {
+    // Some formatting of the titles ahead of the OpenAI prompt.
+    strings
+        .iter()
+        .enumerate()
+        .map(|(index, string)| format!("{}) {}", index + 1, string)) // Format string with numbering
+        .collect::<Vec<_>>()
+        .join("\n")
 }

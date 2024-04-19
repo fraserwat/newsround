@@ -1,49 +1,61 @@
 use crate::parser::{fetch, misc};
 use crate::stories::story::{NewsSource, Story};
 use serde_json::Value;
-use std::error::Error;
+use thiserror::Error;
 
-pub async fn fetch_html_body_for_top_stories() -> Result<Story, Box<dyn Error>> {
+#[derive(Error, Debug)]
+pub enum StoryFetchError {
+    #[error("Top stories JSON is not an array: {0}")]
+    JsonNotArray(String),
+
+    #[error("Failed to fetch any stories: {0}")]
+    FetchFailure(String),
+}
+
+async fn fetch_top_stories() -> Result<Vec<Value>, StoryFetchError> {
     let top_stories_json =
-        fetch::fetch_json("https://hacker-news.firebaseio.com/v0/topstories.json").await?;
+        fetch::fetch_json("https://hacker-news.firebaseio.com/v0/topstories.json")
+            .await
+            .unwrap();
+    match top_stories_json {
+        Value::Array(top_stories) => Ok(top_stories),
+        _ => Err(StoryFetchError::JsonNotArray(
+            "Expected an array of story IDs".to_string(),
+        )),
+    }
+}
 
-    if let Value::Array(top_stories) = top_stories_json {
-        // Bias to the top story, but work our way down otherwise
-        for story_id in top_stories.iter() {
-            let hn_top_story_url = format!(
-                "https://hacker-news.firebaseio.com/v0/item/{}.json",
-                story_id
-            );
+async fn fetch_story_content(story_id: &Value) -> Result<Option<Story>, StoryFetchError> {
+    let hn_top_story_url = format!(
+        "https://hacker-news.firebaseio.com/v0/item/{}.json",
+        story_id
+    );
+    let story_json = fetch::fetch_json(&hn_top_story_url).await.unwrap();
 
-            // TODO: Move this into its own function
-            // Attempt to fetch the story JSON to get the URL
-            match fetch::fetch_json(&hn_top_story_url).await {
-                // If we successfully get a story
-                Ok(story_json) => {
-                    if let Some(url) = story_json["url"].as_str() {
-                        // Attempt to fetch the HTML body
-                        match fetch::get_html_body(url).await {
-                            // Success
-                            Ok(html_body) => {
-                                return Ok(Story {
-                                    // TODO: Look at "struct update syntax" to clean this up.
-                                    title: story_json["title"].to_string(),
-                                    url: hn_top_story_url,
-                                    news_source: NewsSource::HackerNews,
-                                    content: misc::parse_html_body(&html_body).to_string(),
-                                });
-                            }
-                            // Try the next story upon error
-                            Err(_) => continue,
-                        }
-                    }
-                }
-                // Try the next story if fetching story JSON fails
-                Err(_) => continue,
+    match story_json["url"].as_str() {
+        Some(url) => match fetch::get_html_body(url).await {
+            Ok(html_body) if !html_body.trim().is_empty() => Ok(Some(Story {
+                title: story_json["title"].to_string(),
+                url: hn_top_story_url,
+                news_source: NewsSource::HackerNews,
+                content: misc::parse_html_body(&html_body).to_string(),
+            })),
+            _ => Ok(None),
+        },
+        None => Ok(None),
+    }
+}
+
+pub async fn process_top_stories() -> Result<Story, StoryFetchError> {
+    let top_stories = fetch_top_stories().await?;
+    for story_id in top_stories.iter() {
+        if let Some(story) = fetch_story_content(story_id).await? {
+            if !story.content.is_empty() {
+                return Ok(story);
             }
         }
-        Err("Failed to fetch any stories".into()) // If all attempts fail
-    } else {
-        Err("Top stories JSON is not an array".into()) // If the initial fetch does not return an array
     }
+    Err(StoryFetchError::FetchFailure(
+        "No valid stories with non-empty content found".to_string(),
+    ))
 }
