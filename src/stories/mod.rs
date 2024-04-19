@@ -1,4 +1,5 @@
-pub mod bandcamp;
-pub mod hackernews;
-pub mod novara;
+mod bandcamp;
+pub mod generate;
+mod hackernews;
+mod novara;
 pub mod story;

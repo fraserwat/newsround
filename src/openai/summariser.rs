@@ -77,18 +77,18 @@ pub async fn summarise_article_text(article: &Story) -> Result<String, Box<dyn E
     open_ai_api_call(params).await
 }
 
-pub async fn generate_email_subject(titles: Vec<&str>) -> Result<String, Box<dyn Error>> {
+pub async fn generate_email_subject(articles: Vec<String>) -> Result<String, Box<dyn Error>> {
     let params = serde_json::json!({
         "model": "gpt-4-turbo",
         "max_tokens": 100,
         "messages": [
             {
                 "role": "system",
-                "content": "Optimise for brevity. Only output three words which summarise the topics. Do not give any other output."
+                "content": "Optimise for brevity. Only output three words which summarise the articles, one word per article. Do not give any other output. If a story sounds like an album review then try and name the sub-subgenre with one word (if it isn't, disregard this sentence). Be really specific, but this command can be overriden if the story pertains to any proper nouns (companies, countries, etc). Even in the proper noun case where there are more than one proper nouns in the content, pick the one people don't write about as much - your goal is to get me to click on the email subject line!"
             },
             {
                 "role": "user",
-                "content": format!("Give a three word summary of the following titles\n\n\"{}\".\n\nIf there are more than three titles, ignore one at random. Remember, one line, three words. That's it!", format_titles_with_numbering(titles)),
+                "content": format!("Give a three word summary of the following article summaries:\n\n\"{}\".\n\nIf there are more than three articles, ignore one at random. Remember, one line, three words for a email subject, each word should be capitalised like a title. That's it!", format_stories_with_numbering(articles)),
             }
         ]
     });
@@ -96,8 +96,8 @@ pub async fn generate_email_subject(titles: Vec<&str>) -> Result<String, Box<dyn
     open_ai_api_call(params).await
 }
 
-fn format_titles_with_numbering(strings: Vec<&str>) -> String {
-    // Some formatting of the titles ahead of the OpenAI prompt.
+fn format_stories_with_numbering(strings: Vec<String>) -> String {
+    // Some formatting of the article content bulletpoint summaries ahead of the OpenAI prompt.
     strings
         .iter()
         .enumerate()

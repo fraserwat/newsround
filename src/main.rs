@@ -1,52 +1,30 @@
-use crate::openai::summariser::summarise_article_text;
-use crate::stories::story::{NewsSource, Story};
-use crate::stories::{bandcamp, hackernews, novara};
+use crate::openai::summariser::generate_email_subject;
+use crate::stories::generate::generate_story_vector;
+use chrono::{Datelike, Utc};
 
 mod openai;
 mod parser;
 mod stories;
 
-async fn construct_hackernews() -> Story {
-    hackernews::process_top_stories()
-        .await
-        .unwrap_or_else(|_| Story::default_story(NewsSource::HackerNews))
-}
-
-async fn construct_novara() -> Story {
-    novara::fetch_latest_story()
-        .await
-        .unwrap_or_else(|_| Story::default_story(NewsSource::Novara))
-}
-
-async fn construct_bandcamp() -> Story {
-    bandcamp::fetch_bandcamp_daily()
-        .await
-        .unwrap_or_else(|_| Story::default_story(NewsSource::Bandcamp))
-}
+// TODO: Call email generator.
 
 #[tokio::main]
 async fn main() {
-    let stories = vec![
-        construct_hackernews().await,
-        construct_novara().await,
-        construct_bandcamp().await,
-    ];
+    let story_vector = generate_story_vector().await;
+    let mut content_vector: Vec<String> = vec![];
 
-    let mut updated_stories = Vec::new();
-
-    for mut story in stories {
-        if let NewsSource::HackerNews = story.news_source {
-            // println!("{:?}", story.content);
-            match summarise_article_text(&story).await {
-                Ok(summary) => story.content = summary,
-                Err(_) => story.content = "No summary of article available.".to_string(),
-            }
-        }
-        updated_stories.push(story);
+    for story in story_vector {
+        content_vector.push(story.content.clone());
     }
-
-    // Print stories after potentially updating HackerNews stories
-    for story in updated_stories {
-        println!("\nStory: {:?}", story);
-    }
+    let email_subject: String = generate_email_subject(content_vector)
+        .await
+        .unwrap_or_else(|_| {
+            let now = Utc::now();
+            format!(
+                "News Roundup ({}-{:02}-{:02})",
+                now.day(),
+                now.month(),
+                now.year()
+            )
+        });
 }

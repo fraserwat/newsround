@@ -2,7 +2,6 @@ use scraper::{Html, Selector};
 use std::error::Error;
 
 pub fn get_latest_entry_url(html: &str) -> Result<Option<String>, Box<dyn Error>> {
-    // TODO: Option types are only intended to wrap structs. What should I use instead?
     // Get html into a html parser
     let document = Html::parse_document(html);
 
