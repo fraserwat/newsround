@@ -7,12 +7,14 @@ use std::error::Error;
 fn calculate_max_tokens(text: &str) -> usize {
     // Rough whitespace-based token counter to estimate what I need to set my max_token value to.
     let estimated_input_tokens = text.split_whitespace().count();
-    let chatgpt4_max_tokens = 128_000;
+    //
+    // let chatgpt4_max_tokens = 128_000;
+    let chatgpt4_turbo_max_tokens = 4096;
 
     // Err on the side of caution +/- 20%
     (estimated_input_tokens as f64 * 1.2)
         .round()
-        .min(chatgpt4_max_tokens as f64) as usize
+        .min(chatgpt4_turbo_max_tokens as f64) as usize
 }
 
 async fn open_ai_api_call(params: serde_json::Value) -> Result<String, Box<dyn Error>> {
@@ -21,6 +23,8 @@ async fn open_ai_api_call(params: serde_json::Value) -> Result<String, Box<dyn E
 
     // Create API Client
     let client = Client::new();
+
+    // println!("{:?}", params);
 
     // Get response from API
     let response = client
@@ -33,6 +37,7 @@ async fn open_ai_api_call(params: serde_json::Value) -> Result<String, Box<dyn E
 
     if response.status().is_success() {
         let response_text = response.text().await?;
+        // println!("{:?}", response_text);
         let parsed_response: OpenAIResponse = serde_json::from_str(&response_text)?;
 
         // Check if there is at least one choice and message
@@ -48,6 +53,7 @@ async fn open_ai_api_call(params: serde_json::Value) -> Result<String, Box<dyn E
             .text()
             .await
             .unwrap_or_else(|_| "Failed to get error message".to_string());
+        // println!("Error {:?}: {:?}", status, error_message);
         Err(format!("Error {}: {}", status, error_message).into())
     }
 }
@@ -59,11 +65,11 @@ pub async fn summarise_article_text(article: &Story) -> Result<String, Box<dyn E
         "messages": [
             {
                 "role": "system",
-                "content": "You do not refer to 'the text' in any way. You write in a way like you are writing the blurb of a news story on that website's front page. Be professional but not high-brow, and don't use lots of uneccessary adverbs."
+                "content": "You do not refer to 'the text', 'the author' or 'the article' in any way. In fact, avoid starting any sentences with 'The'. Write as if you were the author of the piece I am giving you, from their perspective (you shouldn't use the first person though, write as if this is an extract from the article). Don't use lots of uneccessary adverbs. Match the tone of the author."
             },
             {
                 "role": "user",
-                "content": format!("Summarise the text in between the '```' backticks succinctly in an dispassionate tone you might expect from a newsreader:\n\n```{}```\n\nKeep the summary to 50-100 words, within the context of the title of this article, {}. Make sure your description matches the tone of the piece.", article.content.replace("\"", "'"), article.title.replace("\"", "'")),
+                "content": format!("Summarise the article in between the '```' backticks succinctly:\n\n```{}```\n\nKeep the summary to 50-100 words, within the context of the title of this article, {}.", article.content.replace("\"", "'"), article.title.replace("\"", "'")),
             }
         ]
     });

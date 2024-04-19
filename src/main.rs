@@ -6,32 +6,22 @@ mod openai;
 mod parser;
 mod stories;
 
-// Define a generic default Story creator function
-fn default_story(source: NewsSource) -> Story {
-    Story {
-        title: "".to_string(),
-        url: "".to_string(),
-        news_source: source,
-        content: "".to_string(),
-    }
-}
-
 async fn construct_hackernews() -> Story {
     hackernews::process_top_stories()
         .await
-        .unwrap_or_else(|_| default_story(NewsSource::HackerNews))
+        .unwrap_or_else(|_| Story::default_story(NewsSource::HackerNews))
 }
 
 async fn construct_novara() -> Story {
     novara::fetch_latest_story()
         .await
-        .unwrap_or_else(|_| default_story(NewsSource::Novara))
+        .unwrap_or_else(|_| Story::default_story(NewsSource::Novara))
 }
 
 async fn construct_bandcamp() -> Story {
     bandcamp::fetch_bandcamp_daily()
         .await
-        .unwrap_or_else(|_| default_story(NewsSource::Bandcamp))
+        .unwrap_or_else(|_| Story::default_story(NewsSource::Bandcamp))
 }
 
 #[tokio::main]
@@ -46,6 +36,7 @@ async fn main() {
 
     for mut story in stories {
         if let NewsSource::HackerNews = story.news_source {
+            // println!("{:?}", story.content);
             match summarise_article_text(&story).await {
                 Ok(summary) => story.content = summary,
                 Err(_) => story.content = "No summary of article available.".to_string(),
