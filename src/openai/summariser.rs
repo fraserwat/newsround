@@ -24,8 +24,6 @@ async fn open_ai_api_call(params: serde_json::Value) -> Result<String, Box<dyn E
     // Create API Client
     let client = Client::new();
 
-    // println!("{:?}", params);
-
     // Get response from API
     let response = client
         .post("https://api.openai.com/v1/chat/completions")
@@ -37,7 +35,6 @@ async fn open_ai_api_call(params: serde_json::Value) -> Result<String, Box<dyn E
 
     if response.status().is_success() {
         let response_text = response.text().await?;
-        // println!("{:?}", response_text);
         let parsed_response: OpenAIResponse = serde_json::from_str(&response_text)?;
 
         // Check if there is at least one choice and message
@@ -53,7 +50,6 @@ async fn open_ai_api_call(params: serde_json::Value) -> Result<String, Box<dyn E
             .text()
             .await
             .unwrap_or_else(|_| "Failed to get error message".to_string());
-        // println!("Error {:?}: {:?}", status, error_message);
         Err(format!("Error {}: {}", status, error_message).into())
     }
 }
@@ -84,11 +80,11 @@ pub async fn generate_email_subject(articles: Vec<String>) -> Result<String, Box
         "messages": [
             {
                 "role": "system",
-                "content": "Optimise for brevity. Only output three words which summarise the articles, one word per article. Do not give any other output. If a story sounds like an album review then try and name the sub-subgenre with one word (if it isn't, disregard this sentence). Be really specific, but this command can be overriden if the story pertains to any proper nouns (companies, countries, etc). Even in the proper noun case where there are more than one proper nouns in the content, pick the one people don't write about as much - your goal is to get me to click on the email subject line!"
+                "content": "Optimise for brevity. Only output three words which summarise the articles, one word per article. Do not give any other output. If a story sounds like an album review then try and name the sub-subgenre with one word (if it isn't, disregard this sentence). Be really specific, but this command can be overriden if the story pertains to any proper nouns (companies, countries, etc). Even in the proper noun case where there are more than one proper nouns in the content, pick the one people don't write about as much - your goal is to get me to click on the email subject line! Translate any non-english words to english."
             },
             {
                 "role": "user",
-                "content": format!("Give a three word summary of the following article summaries:\n\n\"{}\".\n\nIf there are more than three articles, ignore one at random. Remember, one line, three words for a email subject, each word should be capitalised like a title. That's it!", format_stories_with_numbering(articles)),
+                "content": format!("Give a three word summary of the following article summaries:\n\n\"{}\".\n\nIf there are more than three articles, ignore one at random (do not ignore any album reviews). Remember, one line, three words for a email subject, each word should be capitalised like a title. That's it!", format_stories_with_numbering(articles)),
             }
         ]
     });

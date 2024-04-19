@@ -5,7 +5,7 @@ use std::error::Error;
 
 pub async fn fetch_latest_story() -> Result<Story, Box<dyn Error>> {
     let top_stories_json =
-        fetch::fetch_json("http://novaramedia.com/wp-json/wp/v2/posts?per_page=5").await?;
+        fetch::fetch_json("http://novaramedia.com/wp-json/wp/v2/posts?per_page=10").await?;
 
     if let Value::Array(top_stories) = top_stories_json {
         for story in top_stories.iter() {
