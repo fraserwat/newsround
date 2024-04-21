@@ -1,8 +1,9 @@
 use super::story::{NewsSource, Story};
-use super::{bandcamp, hackernews, novara};
+use super::{bandcamp, ft, hackernews, novara};
 use crate::openai::summariser::summarise_article_text;
 use regex::Regex;
 
+// TODO: This could be Trait implementations
 async fn construct_hackernews() -> Story {
     hackernews::process_top_stories()
         .await
@@ -19,6 +20,12 @@ async fn construct_bandcamp() -> Story {
     bandcamp::fetch_bandcamp_daily()
         .await
         .unwrap_or_else(|_| Story::default_story(NewsSource::Bandcamp))
+}
+
+async fn construct_financialtimes() -> Story {
+    ft::fetch_ft_daily()
+        .await
+        .unwrap_or_else(|_| Story::default_story(NewsSource::FinancialTimes))
 }
 
 fn clean_html_content(input: &str) -> String {
@@ -47,10 +54,12 @@ fn clean_html_content(input: &str) -> String {
 }
 
 pub async fn generate_story_vector() -> Vec<Story> {
+    // TODO: Introduce parallelism to this process - maybe through mpsc?
     let stories = vec![
         construct_hackernews().await,
         construct_novara().await,
         construct_bandcamp().await,
+        construct_financialtimes().await,
     ];
 
     let mut updated_stories = Vec::new();

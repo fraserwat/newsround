@@ -80,11 +80,11 @@ pub async fn generate_email_subject(articles: Vec<String>) -> Result<String, Box
         "messages": [
             {
                 "role": "system",
-                "content": "Optimise for brevity. Only output three words which summarise the articles, one word per article. Do not give any other output. If a story sounds like an album review then try and name the sub-subgenre with one word (if it isn't, disregard this sentence). Be really specific, but this command can be overriden if the story pertains to any proper nouns (companies, countries, etc). Even in the proper noun case where there are more than one proper nouns in the content, pick the one people don't write about as much - your goal is to get me to click on the email subject line! Translate any non-english words to english."
+                "content": "Optimise for brevity. Only output three words which summarise the articles, one word per article. Do not give any other output. If a story sounds like an album review then try and name the specifgic subgenre with one word but remember adjestives ARE NOT genres. If it isn't an album review, disregard the last sentence. Be really specific, but this command can be overriden if the story pertains to proper nouns (companies, countries, products, but NOT names). Even in the proper noun case where there are more than one main proper nouns in the content, pick the one people don't write about as much - your goal is to get me to click on the email subject line! If they are not in English, translate them TO English. Do NOT start new lines, this will not be picked up by the email client."
             },
             {
                 "role": "user",
-                "content": format!("Give a three word summary of the following article summaries:\n\n\"{}\".\n\nIf there are more than three articles, ignore one at random (do not ignore any album reviews). Remember, one line, three words for a email subject, each word should be capitalised like a title. That's it!", format_stories_with_numbering(articles)),
+                "content": format!("Give a three word summary of the following article summaries:\n\n\"{}\".\n\nIf there are more than three articles, ignore the bottom one (unless the bottom one is an album review, in which case ignore the one above it). Remember, one line, three words for a email subject, each word should be capitalised like a title. That's it!", format_stories_with_numbering(articles)),
             }
         ]
     });
@@ -97,7 +97,8 @@ fn format_stories_with_numbering(strings: Vec<String>) -> String {
     strings
         .iter()
         .enumerate()
-        .map(|(index, string)| format!("{}) {}", index + 1, string)) // Format string with numbering
+        // Format string with numbering
+        .map(|(index, string)| format!("{}) {}", index + 1, string))
         .collect::<Vec<_>>()
         .join("\n")
 }

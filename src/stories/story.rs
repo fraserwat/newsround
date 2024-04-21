@@ -27,7 +27,7 @@ pub enum NewsSource {
     HackerNews,
     Novara,
     Bandcamp,
-    // FinancialTimes,
+    FinancialTimes,
 }
 
 impl fmt::Display for NewsSource {
@@ -40,7 +40,7 @@ impl fmt::Display for NewsSource {
                 NewsSource::HackerNews => "Hacker News",
                 NewsSource::Novara => "Novara Media",
                 NewsSource::Bandcamp => "Bandcamp",
-                // NewsSource::FinancialTimes => "Financial Times",
+                NewsSource::FinancialTimes => "Financial Times",
             }
         )
     }
