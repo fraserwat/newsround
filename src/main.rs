@@ -4,6 +4,7 @@ use crate::openai::summariser::generate_email_subject;
 use crate::stories::generate::generate_story_vector;
 use chrono::{Datelike, Utc};
 use std::env;
+use std::path::Path;
 
 mod email;
 mod openai;
@@ -12,9 +13,9 @@ mod stories;
 
 async fn run() -> (String, String) {
     // Load Environment Variables
-    let env_path = env::var("ENV_PATH").unwrap_or_else(|_| ".env".into());
-    println!("{:?}", env_path);
-    dotenv::from_filename(env_path).ok();
+    let env_path = Path::new(env!("CARGO_MANIFEST_DIR")).join(".env");
+    dotenv::from_path(env_path.as_path()).ok();
+    println!("Environment setup with .env from: {:?}", env_path);
 
     let mut story_vector = generate_story_vector().await;
     let mut content_vector: Vec<String> = vec![];
@@ -32,10 +33,11 @@ async fn run() -> (String, String) {
         Err(e) => {
             let now = Utc::now();
             let error_subject = format!(
-                "{:02}-{:02}-{}: Newsletter Error",
+                "{:02}-{:02}-{}: Newsletter Error ({})",
                 now.day(),
                 now.month(),
-                now.year()
+                now.year(),
+                e
             );
             let error_message = format!("Error rendering newsletter: {}", e);
             (error_message, error_subject)

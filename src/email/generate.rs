@@ -3,6 +3,7 @@ use handlebars::Handlebars;
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 use std::fs;
+use std::path::Path;
 
 pub fn render_newsletter(stories: &mut Vec<Story>) -> Result<String, Box<dyn std::error::Error>> {
     // Shuffle the stories
@@ -11,9 +12,9 @@ pub fn render_newsletter(stories: &mut Vec<Story>) -> Result<String, Box<dyn std
     // Create a new Handlebars instance
     let mut handlebars = Handlebars::new();
 
-    // Load up html template
-    let template_filepath = fs::read_to_string("src/email/template.html")?;
-    handlebars.register_template_string("newsletter", template_filepath)?;
+    // Load the HTML template for the newsletter
+    let template_path = Path::new(env!("CARGO_MANIFEST_DIR")).join("src/email/template.html");
+    handlebars.register_template_string("newsletter", fs::read_to_string(template_path)?)?;
 
     // Convert Story vector to JSON.
     let data = serde_json::json!({ "stories": stories });

@@ -40,7 +40,7 @@ EMAIL_FROM="Your Name <yourname@mailgundomain1234567890.mailgun.org>"
 EMAIL_TO=youremail@gmail.com
 ```
 
-Give it a quick test run, to make sure everything works ok.
+Give it a quick test run, to make sure everything works ok. The dotenv loader at the start of `main()` assumes that you have saved this in the project root (i.e. `/newsround/.env`).
 
 `./target/release/newsround`
 
@@ -63,10 +63,8 @@ System clock synchronized: yes
           RTC in local TZ: no
 ```
 
-The important bit is the "System clock synchronized: yes". Now you can open up your cron scheduler (`crontab -e`), and set up a new job. You will need to pass the ENV_PATH variable as wherever you saved the .env file (⚠️ don't save it in root!! ⚠️) in order for the scheduler to be able to run from the root folder. Check out the first part of `main()` in `/main.rs` to see how this works.
-
-The below is daily at 7AM, giving me something to read after the gym during breakfast! 🙂
+The important bit is the "System clock synchronized: yes". Now you can open up your cron scheduler (`crontab -e`), and set up a new job. The below is daily at 7AM, giving me something to read after the gym during breakfast! 🙂
 
 ```
-ENV_PATH="/root/newsround/.env" 0 7 * * * /root/newsround/target/release/newsround >> /var/log/newsround.log 2>&1
+0 7 * * * /root/newsround/target/release/newsround >> /var/log/newsround.log 2>&1
 ```
