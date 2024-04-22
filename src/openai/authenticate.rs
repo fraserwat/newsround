@@ -1,10 +1,7 @@
-use dotenv::dotenv;
 use reqwest::Client;
 use std::env;
 
 pub async fn authenticate_openai_api_key() -> Result<String, String> {
-    // Load .env variables
-    dotenv().ok();
     // Get the OpenAI API key from the .dotenv file.
     let api_key = env::var("OPENAI_API_KEY").expect("OPENAI_API_KEY must be set");
 

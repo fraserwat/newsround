@@ -3,6 +3,7 @@ use crate::email::send::send_email;
 use crate::openai::summariser::generate_email_subject;
 use crate::stories::generate::generate_story_vector;
 use chrono::{Datelike, Utc};
+use std::env;
 
 mod email;
 mod openai;
@@ -10,6 +11,11 @@ mod parser;
 mod stories;
 
 async fn run() -> (String, String) {
+    // Load Environment Variables
+    let env_path = env::var("ENV_PATH").unwrap_or_else(|_| ".env".into());
+    println!("{:?}", env_path);
+    dotenv::from_filename(env_path).ok();
+
     let mut story_vector = generate_story_vector().await;
     let mut content_vector: Vec<String> = vec![];
 
