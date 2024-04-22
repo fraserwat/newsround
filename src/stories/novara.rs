@@ -12,9 +12,10 @@ pub async fn fetch_latest_story() -> Result<Story, Box<dyn Error>> {
             // If it doesn't have a long content item then it is probably a video or podcast.
             let is_article = story["content"]["rendered"].to_string().len() > 1000;
             if is_article {
+                let url = story["link"].as_str().unwrap_or_default().to_string();
                 return Ok(Story {
+                    url,
                     title: story["title"]["rendered"].to_string(),
-                    url: story["link"].to_string(),
                     news_source: NewsSource::Novara,
                     content: story["excerpt"]["rendered"].to_string(),
                 });

@@ -34,12 +34,15 @@ async fn fetch_story_content(story_id: &Value) -> Result<Option<Story>, StoryFet
 
     match story_json["url"].as_str() {
         Some(url) => match fetch::get_html_body(url).await {
-            Ok(html_body) if !html_body.trim().is_empty() => Ok(Some(Story {
-                title: story_json["title"].to_string(),
-                url: hn_top_story_url,
-                news_source: NewsSource::HackerNews,
-                content: misc::parse_html_body(&html_body).to_string(),
-            })),
+            Ok(html_body) if !html_body.trim().is_empty() => {
+                let url = story_json["url"].as_str().unwrap_or_default().to_string();
+                Ok(Some(Story {
+                    url,
+                    title: story_json["title"].to_string(),
+                    news_source: NewsSource::HackerNews,
+                    content: misc::parse_html_body(&html_body).to_string(),
+                }))
+            }
             _ => Ok(None),
         },
         None => Ok(None),
