@@ -5,6 +5,7 @@ use crate::stories::generate::generate_story_vector;
 use chrono::{Datelike, Utc};
 use std::env;
 use std::path::Path;
+use std::time::Instant;
 
 mod email;
 mod openai;
@@ -12,13 +13,10 @@ mod parser;
 mod stories;
 
 async fn run() -> (String, String) {
-    // Load Environment Variables
-    let env_path = Path::new(env!("CARGO_MANIFEST_DIR")).join(".env");
-    dotenv::from_path(env_path.as_path()).ok();
-    println!("Environment setup with .env from: {:?}", env_path);
-
     let mut story_vector = generate_story_vector().await;
     let mut content_vector: Vec<String> = vec![];
+    let now = Utc::now();
+    let today = format!("{:02}-{:02}-{}", now.day(), now.month(), now.year());
 
     let (html, email_subject) = match render_newsletter(&mut story_vector) {
         Ok(html) => {
@@ -31,34 +29,24 @@ async fn run() -> (String, String) {
             (html, subject_result)
         }
         Err(e) => {
-            let now = Utc::now();
-            let error_subject = format!(
-                "{:02}-{:02}-{}: Newsletter Error ({})",
-                now.day(),
-                now.month(),
-                now.year(),
-                e
-            );
+            let error_subject = format!("{}: Newsletter Error ({})", today, e);
             let error_message = format!("Error rendering newsletter: {}", e);
             (error_message, error_subject)
         }
     };
 
-    let now = Utc::now();
-    let formatted_subject = format!(
-        "{:02}-{:02}-{}: {}",
-        now.day(),
-        now.month(),
-        now.year(),
-        email_subject
-    );
+    let formatted_subject = format!("{}: {}", today, email_subject);
 
     (html, formatted_subject)
 }
 
 #[tokio::main]
 async fn main() {
-    use std::time::Instant;
+    // Load Environment Variables
+    let env_path = Path::new(env!("CARGO_MANIFEST_DIR")).join(".env");
+    dotenv::from_path(env_path.as_path()).ok();
+    println!("Environment setup with .env from: {:?}", env_path);
+
     let now = Instant::now();
 
     {
@@ -71,6 +59,7 @@ async fn main() {
     }
 
     let elapsed = now.elapsed().as_secs();
+
     // Pre-Parallelism Runtime: 9s
     println!("Runtime: {:.2?}s", elapsed);
 }
