@@ -8,7 +8,6 @@ pub async fn send_email(subject: String, html_content: String) -> Result<(), Box
     let domain = env::var("MAILGUN_DOMAIN").expect("MAILGUN_DOMAIN must be set");
     let to = env::var("EMAIL_TO").expect("EMAIL_TO must be set");
     let from = env::var("EMAIL_FROM").expect("EMAIL_FROM must be set");
-    // TODO: Possible to encode API Key without auth issues?
     let api_key = format!(
         "Basic {}",
         env::var("MAILGUN_API_KEY").expect("MAILGUN_API_KEY must be set")

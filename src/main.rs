@@ -60,6 +60,7 @@ async fn main() {
 
     let elapsed = now.elapsed().as_secs();
 
-    // Pre-Parallelism Runtime: 9s
+    // Last 5 Pre-Parallelism Runtimes (sec): [11, 14, 12, 13, 14] (avg = 12.8 sec)
+    // Last 5 Post-Parallelism Runtimes (sec): [11, 8, 8, 9, 10] (avg = 9.2 sec)
     println!("Runtime: {:.2?}s", elapsed);
 }

@@ -111,6 +111,6 @@ Might want to mess around with the cron on a new line to make sure it's actually
 
 ## To-Do's
 
-- [ ] Rewrite website API calls to run in parallel.
+- [x] Rewrite website API calls to run in parallel. Done, with a 28% drop in execution time!! 🔥🔥🔥
 - [ ] Prompt engineering for better subject lines.
 - [ ] Refactor for latest post on the Bandcamp Daily blog, not today's Album of the Day (I just find the former more interesting).

@@ -3,11 +3,21 @@ use super::{bandcamp, ft, hackernews, novara};
 use crate::openai::summariser::summarise_article_text;
 use regex::Regex;
 
-// TODO: This could be Trait implementations
 async fn construct_hackernews() -> Story {
-    hackernews::process_top_stories()
-        .await
-        .unwrap_or_else(|_| Story::default_story(NewsSource::HackerNews))
+    match hackernews::process_top_stories().await {
+        Ok(mut story) => {
+            // Summarize article while the other Story structs are running.
+            match summarise_article_text(&story).await {
+                // Update content if summary is successful
+                Ok(summary) => story.content = summary,
+                // Use a default message on error
+                Err(_) => story.content = "No summary of article available.".to_string(),
+            }
+            // Return story with either updated or default content
+            story
+        }
+        Err(_) => Story::default_story(NewsSource::HackerNews),
+    }
 }
 
 async fn construct_novara() -> Story {
@@ -54,30 +64,20 @@ fn clean_html_content(input: &str) -> String {
 }
 
 pub async fn generate_story_vector() -> Vec<Story> {
-    // TODO: Introduce parallelism to this process - maybe through mpsc?
-    let stories = vec![
-        construct_hackernews().await,
-        construct_novara().await,
-        construct_bandcamp().await,
-        construct_financialtimes().await,
-    ];
+    let (hackernews, novara, bandcamp, ft) = tokio::join!(
+        construct_hackernews(),
+        construct_novara(),
+        construct_bandcamp(),
+        construct_financialtimes()
+    );
 
-    let mut updated_stories = Vec::new();
-
-    for mut story in stories {
-        if let NewsSource::HackerNews = story.news_source {
-            // Handling HackerNews stories
-            match summarise_article_text(&story).await {
-                Ok(summary) => story.content = summary,
-                Err(_) => story.content = "No summary of article available.".to_string(),
-            }
-        } else {
-            // Clean HTML content for all other news sources
+    let stories = vec![hackernews, novara, bandcamp, ft]
+        .into_iter()
+        .map(|mut story| {
+            // Get rid of weird HTML artefacts in the email text.
             story.content = clean_html_content(&story.content);
-        }
-        updated_stories.push(story);
-    }
-
-    // Return stories after updating HackerNews story with OpenAI summariser
-    updated_stories
+            story
+        })
+        .collect::<Vec<Story>>();
+    stories
 }
