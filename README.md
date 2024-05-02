@@ -2,7 +2,7 @@
 
 ## Preface
 
-At the beginning of 2024, I wanted to get my iPhone screentime down to an average of 1 hour daily. I have a lot of stuff I want to do this year (finishing my MSc, learning an instrument, all alongside doing good quality work with a healthy work-life balance), so theres a pull factor in wanting to be as productive as possible, plus there's a lot of stuff out there on how the way our smartphone technology (especially social media) destroy our attention spans, do weird stuff to our dopamine receptors and I dunno, there's just stuff I don't need to see first / last thing every day.
+At the beginning of 2024, I wanted to get my iPhone screentime down to a 1 hour daily average. There's a lot of stuff I want to do this year (finishing my MSc, learning an instrument, all alongside doing good quality work with a healthy work-life balance), so theres a pull factor in wanting to be as productive as possible, plus there's a lot of stuff out there on how the way our smartphone technology (especially social media) destroy our attention spans, do weird stuff to our dopamine receptors and I dunno, there's just stuff I don't need to see first / last thing every day.
 
 I did manage this and it was definitely a net positive, but the downside was I didn't have any idea what was going on in the society I lived in anymore -- I was totally uninformed, which I don't think is a cool or interesting trait to have. There are definitely lower effort ways of squaring that circle, but this way I had got a project in the new programming language I was learning.
 
