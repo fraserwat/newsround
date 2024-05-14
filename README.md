@@ -17,8 +17,8 @@ I **did** manage this and it was a huge net positive, but the downside was I did
 
 ### What did I learn?
 
-- A lot of Rust experience! Including its (sometimes annoying!) type system, what needs to be a public / private function (I never had to worry about in Python), working with API's, JSON, working with HTML in Rust, etc.
-- Parallelism! Basically all the runtime in this program is spent waiting on API calls so I was able to speed it up by 28% by running a lot of them in parallel. Much easier to do this in Rust than Python (where I've always found parallelism to be sort of an afterthought?).
+- A lot of Rust experience! Incl. its strict type system, what needs to be a public vs private function (which I never had to worry about in Python), working with HTML / API's / JSON in Rust.
+- Parallelism! Vast majority of the runtime in this program is spent waiting on API calls so I was able to speed it up by 28% by running a lot of them in parallel. Much easier to do this in Rust than Python (where I've always found parallelism to be sort of an afterthought?).
 - Prompt engineering for summarising text in varying degrees of berevity.
 
 ## Installation
