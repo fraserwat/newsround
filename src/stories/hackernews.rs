@@ -31,9 +31,9 @@ async fn fetch_story_content(story_id: &Value) -> Result<Option<Story>, StoryFet
         story_id
     );
     let story_json = fetch::fetch_json(&hn_top_story_url).await.unwrap();
-    let url = story_json["url"].as_str().unwrap().to_string();
-
+    
     // TODO: This is messy. Clean it up!
+    let url = story_json["url"].as_str().unwrap().to_string();
     match fetch::get_html_body(&url).await {
         Ok(html_body) if !html_body.trim().is_empty() => Ok(Some(Story {
             url: story_json["url"].as_str().unwrap().to_string(),
