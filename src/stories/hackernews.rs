@@ -31,22 +31,17 @@ async fn fetch_story_content(story_id: &Value) -> Result<Option<Story>, StoryFet
         story_id
     );
     let story_json = fetch::fetch_json(&hn_top_story_url).await.unwrap();
+    let url = story_json["url"].as_str().unwrap().to_string();
 
     // TODO: This is messy. Clean it up!
-    match story_json["url"].as_str() {
-        Some(url) => match fetch::get_html_body(url).await {
-            Ok(html_body) if !html_body.trim().is_empty() => {
-                let url = story_json["url"].as_str().unwrap_or_default().to_string();
-                Ok(Some(Story {
-                    url,
-                    title: story_json["title"].to_string(),
-                    news_source: NewsSource::HackerNews,
-                    content: misc::parse_html_body(&html_body).unwrap().to_string(),
-                }))
-            }
-            _ => Ok(None),
-        },
-        None => Ok(None),
+    match fetch::get_html_body(&url).await {
+        Ok(html_body) if !html_body.trim().is_empty() => Ok(Some(Story {
+            url: story_json["url"].as_str().unwrap().to_string(),
+            title: story_json["title"].to_string(),
+            news_source: NewsSource::HackerNews,
+            content: misc::parse_html_body(&html_body).unwrap().to_string(),
+        })),
+        _ => Ok(None),
     }
 }
 
