@@ -1,11 +1,5 @@
 # Daily News Roundup
 
-## Preface
-
-At the beginning of 2024, I wanted to get my iPhone screentime down to a 1 hour daily average. There's a lot of stuff I want to do this year (finishing my MSc, learning an instrument, all alongside doing good quality work with a healthy work-life balance), so theres a pull factor in wanting to be as productive as possible, plus there's a lot of stuff out there on how the way our smartphone technology (especially social media) destroy our attention spans, do weird stuff to our dopamine receptors and I dunno, there's just stuff I don't need to see first / last thing every day.
-
-I did manage this and it was definitely a net positive, but the downside was I didn't have any idea what was going on in the society I lived in anymore -- I was totally uninformed, which I don't think is a cool or interesting trait to have. There are definitely lower effort ways of squaring that circle, but this way I had got a project in the new programming language I was learning.
-
 ## What is this?
 
 A daily email in my inbox, which contains a headline (as a hyperlink) and a short summary of the following:
@@ -14,6 +8,18 @@ A daily email in my inbox, which contains a headline (as a hyperlink) and a shor
 - Today's Bandcamp Album of the Day.
 - The top story on HackerNews at the time of running (using the OpenAI API to summarise the article in a short paragraph).
 - The most recent story from Novara Media, a UK based political news website.
+
+## Preface
+
+In 2024, I wanted to get my iPhone screentime down to ~1 hour daily. There's a lot of stuff I want to do this year (finishing a MSc, learning an instrument, doing good quality work with a healthy work-life balance), so theres a pull factor in wanting to be as productive as possible, plus I'd been reasding a lot about the impact of smartphone use (specifically social media!) on attention spans, dopamine receptors etc and I dunno, there's just stuff in the world I don't need to see first thing every morning.
+
+I **did** manage this and it was a huge net positive, but the downside was I didn't have any idea what was going on in the society I lived in -- totally uninformed! Which I don't think is a cool or interesting trait to have. There's probably lower effort ways of squaring that circle, but this way I got to build project in the new programming language I was learning.
+
+### What did I learn?
+
+- A lot of Rust experience! Including its (sometimes annoying!) type system, what needs to be a public / private function (I never had to worry about in Python), working with API's, JSON, working with HTML in Rust, etc.
+- Parallelism! Basically all the runtime in this program is spent waiting on API calls so I was able to speed it up by 28% by running a lot of them in parallel. Much easier to do this in Rust than Python (where I've always found parallelism to be sort of an afterthought?).
+- Prompt engineering for summarising text in varying degrees of berevity.
 
 ## Installation
 
