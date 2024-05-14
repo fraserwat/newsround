@@ -25,8 +25,8 @@ pub async fn send_email(subject: String, html_content: String) -> Result<(), Box
     let client = Client::new();
     let headers = {
         let mut headers = HeaderMap::with_capacity(2);
-        headers.insert(AUTHORIZATION, api_key.parse().unwrap());
-        headers.insert(CONTENT_TYPE, "application/json".parse().unwrap());
+        headers.insert(AUTHORIZATION, api_key.parse()?);
+        headers.insert(CONTENT_TYPE, "application/json".parse()?);
         headers
     };
 

@@ -6,8 +6,7 @@ pub fn get_latest_entry_url(html: &str) -> Result<Option<String>, Box<dyn Error>
     let document = Html::parse_document(html);
 
     // Create a selector for the first child of the Album of the Day article list.
-    let select_latest =
-        Selector::parse("#p-daily-franchise > articles-list > *:nth-child(1) > a").unwrap();
+    let select_latest = Selector::parse("#p-daily-franchise > articles-list > *:nth-child(1) > a")?;
     // Create selector to extract the URL from the above element.
     let url_option = document
         .select(&select_latest)
@@ -24,8 +23,8 @@ pub fn get_latest_entry_url(html: &str) -> Result<Option<String>, Box<dyn Error>
 pub fn get_latest_title_paragraph(html: &str) -> Result<(String, String), Box<dyn Error>> {
     let document = Html::parse_document(html);
     // Grab first paragraph of article
-    let title_selector = Selector::parse(".aotd .title-wrapper a").unwrap();
-    let article_selector = Selector::parse(".aotd p").unwrap();
+    let title_selector = Selector::parse(".aotd .title-wrapper a")?;
+    let article_selector = Selector::parse(".aotd p")?;
 
     let title = document
         .select(&title_selector)

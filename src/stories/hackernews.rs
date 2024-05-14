@@ -32,6 +32,7 @@ async fn fetch_story_content(story_id: &Value) -> Result<Option<Story>, StoryFet
     );
     let story_json = fetch::fetch_json(&hn_top_story_url).await.unwrap();
 
+    // TODO: This is messy. Clean it up!
     match story_json["url"].as_str() {
         Some(url) => match fetch::get_html_body(url).await {
             Ok(html_body) if !html_body.trim().is_empty() => {
@@ -40,7 +41,7 @@ async fn fetch_story_content(story_id: &Value) -> Result<Option<Story>, StoryFet
                     url,
                     title: story_json["title"].to_string(),
                     news_source: NewsSource::HackerNews,
-                    content: misc::parse_html_body(&html_body).to_string(),
+                    content: misc::parse_html_body(&html_body).unwrap().to_string(),
                 }))
             }
             _ => Ok(None),
