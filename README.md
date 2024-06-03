@@ -11,7 +11,7 @@ A daily email in my inbox, which contains a headline (as a hyperlink) and a shor
 
 ## Preface
 
-In 2024, I wanted to get my iPhone screentime down to ~1 hour daily. There's a lot of stuff I want to do this year (finishing a MSc, learning an instrument, doing good quality work with a healthy work-life balance), so theres a pull factor in wanting to be as productive as possible, plus I'd been reasding a lot about the impact of smartphone use (specifically social media!) on attention spans, dopamine receptors etc and I dunno, there's just stuff in the world I don't need to see first thing every morning.
+In 2024, I wanted to get my iPhone screentime down to ~1 hour daily. There's a lot of stuff I want to do this year (finishing a MSc, learning an instrument, doing good quality work with a healthy work-life balance), so theres a pull factor in wanting to be as productive as possible, plus the impact of smartphone use (specifically social media!) on attention spans etc.
 
 I **did** manage this and it was a huge net positive, but the downside was I didn't have any idea what was going on in the society I lived in -- totally uninformed! Which I don't think is a cool or interesting trait to have. There's probably lower effort ways of squaring that circle, but this way I got to build project in the new programming language I was learning.
 
