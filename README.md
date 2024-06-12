@@ -7,18 +7,16 @@ A daily email in my inbox, which contains a headline (as a hyperlink) and a shor
 - The top story on the Financial Times UK page.
 - Today's Bandcamp Album of the Day.
 - The top story on HackerNews at the time of running (using the OpenAI API to summarise the article in a short paragraph).
-- The most recent story from Novara Media, a UK based political news website.
+- The most recent story from Novara Media, a UK-based political news website.
 
 ## Preface
 
-In 2024, I wanted to get my iPhone screentime down to ~1 hour daily. There's a lot of stuff I want to do this year (finishing a MSc, learning an instrument, doing good quality work with a healthy work-life balance), so theres a pull factor in wanting to be as productive as possible, plus the impact of smartphone use (specifically social media!) on attention spans etc.
-
-I **did** manage this and it was a huge net positive, but the downside was I didn't have any idea what was going on in the society I lived in -- totally uninformed! Which I don't think is a cool or interesting trait to have. There's probably lower effort ways of squaring that circle, but this way I got to build project in the new programming language I was learning.
+In 2024, I wanted to get my iPhone screentime down to ~1 hour daily. I just find it a time suck, and theres a lot of documented impact of smartphone use (specifically social media!) on attention spans etc. I **did** manage this and it was a net positive, but the downside was I felt totally uninformed, which I don't think is a cool or interesting trait to have. There's probably lower effort ways of squaring that circle, but this way I got to build project in the new programming language I was learning.
 
 ### What did I learn?
 
 - A lot of Rust experience! Incl. its strict type system, what needs to be a public vs private function (which I never had to worry about in Python), working with HTML / API's / JSON in Rust.
-- Parallelism! Vast majority of the runtime in this program is spent waiting on API calls so I was able to speed it up by 28% by running a lot of them in parallel. Much easier to do this in Rust than Python (where I've always found parallelism to be sort of an afterthought?).
+- Parallelism! Vast majority of the runtime in this program is spent waiting on API calls so I was able to speed it up by ~30% by running a lot of them in parallel.
 - Prompt engineering for summarising text in varying degrees of berevity.
 
 ## Installation
