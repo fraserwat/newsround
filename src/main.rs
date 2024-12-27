@@ -1,6 +1,5 @@
 use crate::email::generate::render_newsletter;
 use crate::email::send::send_email;
-use crate::openai::summariser::generate_email_subject;
 use crate::stories::generate::generate_story_vector;
 use chrono::{Datelike, Utc};
 use std::env;
@@ -18,24 +17,19 @@ async fn run() -> (String, String) {
     let now = Utc::now();
     let today = format!("{:02}-{:02}-{}", now.day(), now.month(), now.year());
 
-    let (html, email_subject) = match render_newsletter(&mut story_vector) {
+    let html = match render_newsletter(&mut story_vector) {
         Ok(html) => {
             for story in story_vector {
                 content_vector.push(story.content.clone());
             }
-            let subject_result = generate_email_subject(content_vector)
-                .await
-                .unwrap_or_else(|_| "News Roundup".to_string());
-            (html, subject_result)
+            html
         }
         Err(e) => {
-            let error_subject = format!("{}: Newsletter Error ({})", today, e);
-            let error_message = format!("Error rendering newsletter: {}", e);
-            (error_message, error_subject)
+            format!("Error rendering newsletter: {}", e)
         }
     };
 
-    let formatted_subject = format!("{}: {}", today, email_subject);
+    let formatted_subject = format!("News Roundup: {}", today);
 
     (html, formatted_subject)
 }

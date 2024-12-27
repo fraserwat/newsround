@@ -7,10 +7,8 @@ use std::error::Error;
 fn calculate_max_tokens(text: &str) -> usize {
     // Rough whitespace-based token counter to estimate what I need to set my max_token value to.
     let estimated_input_tokens = text.split_whitespace().count();
-    //
     // let chatgpt4_max_tokens = 128_000;
     let chatgpt4_turbo_max_tokens = 4096;
-
     // Err on the side of caution +/- 20%
     (estimated_input_tokens as f64 * 1.2)
         .round()
@@ -20,10 +18,8 @@ fn calculate_max_tokens(text: &str) -> usize {
 async fn open_ai_api_call(params: serde_json::Value) -> Result<String, Box<dyn Error>> {
     // Get OpenAI API Key
     let api_key = authenticate_openai_api_key().await?;
-
     // Create API Client
     let client = Client::new();
-
     // Get response from API
     let response = client
         .post("https://api.openai.com/v1/chat/completions")
@@ -32,11 +28,9 @@ async fn open_ai_api_call(params: serde_json::Value) -> Result<String, Box<dyn E
         .json(&params)
         .send()
         .await?;
-
     if response.status().is_success() {
         let response_text = response.text().await?;
         let parsed_response: OpenAIResponse = serde_json::from_str(&response_text)?;
-
         // Check if there is at least one choice and message
         if let Some(first_choice) = parsed_response.choices.get(0) {
             // Return the message content
@@ -55,50 +49,33 @@ async fn open_ai_api_call(params: serde_json::Value) -> Result<String, Box<dyn E
 }
 
 pub async fn summarise_article_text(article: &Story) -> Result<String, Box<dyn Error>> {
+    // For readability, splitting out the messages and object definition.
+    let system_content: String = r"You do not refer to 'the text', 'the author' or 'the article' in any way.\ 
+    Avoid starting any sentences with 'The'. Write as if you were the author of the piece I am giving you,\ 
+    from their perspective (instead of writing in first person, write as if its an extract from the article).\ 
+    Don't use uneccessary adverbs. Match the tone of the author, but keep it user-friendly.\ 
+    Do not include URLs, as we already have a link to the article.".to_string();
+    let user_content: String = format!(r"Summarise the article in between the '```' backticks in ~50 words:\n
+    \n```{}```\n\nKeep the summary to roughly 50 words, within the context of the title of this article, {}.\ 
+    Remember, 50 word limit, user-friendly, only the important info. So `versatile solution` would just be `solution`,\ 
+    `it utilizes Docker for simple installation` would be written instead as `it uses Docker for installation`.\ 
+    ", article.content.replace("\"", "'"), article.title.replace("\"", "'")).to_string();
+    
+    // Obj definition
     let params = serde_json::json!({
         "model": "gpt-4-turbo",
         "max_tokens": calculate_max_tokens(&article.content),
         "messages": [
             {
                 "role": "system",
-                "content": "You do not refer to 'the text', 'the author' or 'the article' in any way. In fact, avoid starting any sentences with 'The'. Write as if you were the author of the piece I am giving you, from their perspective (you shouldn't use the first person though, write as if this is an extract from the article). Don't use lots of uneccessary adverbs. Match the tone of the author."
+                "content": system_content
             },
             {
                 "role": "user",
-                "content": format!("Summarise the article in between the '```' backticks succinctly:\n\n```{}```\n\nKeep the summary to 50-100 words, within the context of the title of this article, {}.", article.content.replace("\"", "'"), article.title.replace("\"", "'")),
+                "content": user_content,
             }
         ]
     });
 
     open_ai_api_call(params).await
-}
-
-pub async fn generate_email_subject(articles: Vec<String>) -> Result<String, Box<dyn Error>> {
-    let params = serde_json::json!({
-        "model": "gpt-4-turbo",
-        "max_tokens": 100,
-        "messages": [
-            {
-                "role": "system",
-                "content": "Optimise for brevity. Only output three words which summarise the articles, one word per article. Do not give any other output. If a story sounds like an album review then try and name the specifgic subgenre with one word but remember adjestives ARE NOT genres. If it isn't an album review, disregard the last sentence. Be really specific, but this command can be overriden if the story pertains to proper nouns (companies, countries, products, but NOT names). Even in the proper noun case where there are more than one main proper nouns in the content, pick the one people don't write about as much - your goal is to get me to click on the email subject line! If they are not in English, translate them TO English. Do NOT start new lines, this will not be picked up by the email client."
-            },
-            {
-                "role": "user",
-                "content": format!("Give a three word summary of the following article summaries:\n\n\"{}\".\n\nIf there are more than three articles, ignore the bottom one (unless the bottom one is an album review, in which case ignore the one above it). Remember, one line, three words for a email subject, each word should be capitalised like a title. That's it!", format_stories_with_numbering(articles)),
-            }
-        ]
-    });
-
-    open_ai_api_call(params).await
-}
-
-fn format_stories_with_numbering(strings: Vec<String>) -> String {
-    // Some formatting of the article content bulletpoint summaries ahead of the OpenAI prompt.
-    strings
-        .iter()
-        .enumerate()
-        // Format string with numbering
-        .map(|(index, string)| format!("{}) {}", index + 1, string))
-        .collect::<Vec<_>>()
-        .join("\n")
 }

@@ -3,22 +3,36 @@ use crate::stories::story::{NewsSource, Story};
 use std::error::Error;
 
 pub async fn fetch_bandcamp_daily() -> Result<Story, Box<dyn Error>> {
-    let base_url = "https://daily.bandcamp.com/album-of-the-day";
-    let webpage = fetch::get_html_body(base_url).await?;
+    let base_urls = [
+        "https://daily.bandcamp.com/features",
+        "https://daily.bandcamp.com/lists",
+        "https://daily.bandcamp.com/best-of-2025",
+        "https://daily.bandcamp.com/album-of-the-day",
+        ];
 
-    let daily_url =
-        bandcamp::get_latest_entry_url(&webpage)?.ok_or_else(|| "No entry for today. Sad!")?;
+        for base_url in base_urls {
+            let webpage = fetch::get_html_body(base_url).await?;
+            let slug: String = base_url.to_string().replace("https://daily.bandcamp.com", "");
 
-    // Add latest entry stub to url
-    let url = format!("{}{}", base_url, daily_url);
-    let daily_html = fetch::get_html_body(&url).await?;
+            if let Ok(Some(daily_url)) = bandcamp::get_latest_entry_url(&webpage, &slug) {
+                let url = format!("{}{}", base_url, daily_url);
+                let daily_html = fetch::get_html_body(&url).await?;
 
-    let (title, content) = bandcamp::get_latest_title_paragraph(&daily_html)?;
+                match bandcamp::get_latest_title_paragraph(&daily_html) {
+                    Ok((title, content)) => {
+                        return Ok(Story {
+                            title,
+                            url,
+                            content,
+                            news_source: NewsSource::Bandcamp,
+                        })
+                    },
+                    Err(e) => {
+                        println!("{:?}", e);
+                    }
+                }
+            }
+        }
 
-    Ok(Story {
-        title,
-        url,
-        content,
-        news_source: NewsSource::Bandcamp,
-    })
-}
+        Err("No entry for today. Sad!".into())
+    }
