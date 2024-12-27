@@ -12,7 +12,7 @@ fn calculate_max_tokens(text: &str) -> usize {
     // Err on the side of caution +/- 20%
     (estimated_input_tokens as f64 * 1.2)
         .round()
-        .min(chatgpt4_turbo_max_tokens as f64) as usize
+        .min(f64::from(chatgpt4_turbo_max_tokens)) as usize
 }
 
 async fn open_ai_api_call(params: serde_json::Value) -> Result<String, Box<dyn Error>> {
@@ -24,7 +24,7 @@ async fn open_ai_api_call(params: serde_json::Value) -> Result<String, Box<dyn E
     let response = client
         .post("https://api.openai.com/v1/chat/completions")
         .header("Content-Type", "application/json")
-        .header("Authorization", format!("Bearer {}", api_key))
+        .header("Authorization", format!("Bearer {api_key}"))
         .json(&params)
         .send()
         .await?;
@@ -44,7 +44,7 @@ async fn open_ai_api_call(params: serde_json::Value) -> Result<String, Box<dyn E
             .text()
             .await
             .unwrap_or_else(|_| "Failed to get error message".to_string());
-        Err(format!("Error {}: {}", status, error_message).into())
+        Err(format!("Error {status}: {error_message}").into())
     }
 }
 
@@ -59,7 +59,7 @@ pub async fn summarise_article_text(article: &Story) -> Result<String, Box<dyn E
     \n```{}```\n\nKeep the summary to roughly 50 words, within the context of the title of this article, {}.\ 
     Remember, 50 word limit, user-friendly, only the important info. So `versatile solution` would just be `solution`,\ 
     `it utilizes Docker for simple installation` would be written instead as `it uses Docker for installation`.\ 
-    ", article.content.replace("\"", "'"), article.title.replace("\"", "'")).to_string();
+    ", article.content.replace('"', "'"), article.title.replace('"', "'")).to_string();
     
     // Obj definition
     let params = serde_json::json!({

@@ -12,9 +12,7 @@ pub fn get_top_story(html: &str) -> Result<(String, String, String), Box<dyn Err
 
     // Create selector to extract the URL from the above element.
     let url_option = document
-        .select(&top_selector)
-        .filter_map(|element| element.value().attr("href"))
-        .next()
+        .select(&top_selector).find_map(|element| element.value().attr("href"))
         .map(|u| "https://www.ft.com".to_owned() + u);
     // Get text from the title and subheader
     let title_option = document

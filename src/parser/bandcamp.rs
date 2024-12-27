@@ -9,9 +9,7 @@ pub fn get_latest_entry_url(html: &str, slug: &str) -> Result<Option<String>, Bo
     let select_latest = Selector::parse("#p-daily-franchise > articles-list > *:nth-child(1) > a")?;
     // Create selector to extract the URL from the above element.
     let url_option = document
-        .select(&select_latest)
-        .filter_map(|element| element.value().attr("href"))
-        .next()
+        .select(&select_latest).find_map(|element| element.value().attr("href"))
         .map(|u| u.to_string().replace(slug, ""));
     match url_option {
         Some(url) if !url.is_empty() => Ok(Some(url)),

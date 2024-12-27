@@ -9,7 +9,7 @@ pub async fn authenticate_openai_api_key() -> Result<String, Box<dyn error::Erro
     let client = Client::new();
     let response = client
         .get("https://api.openai.com/v1/engines")
-        .header("Authorization", format!("Bearer {}", api_key))
+        .header("Authorization", format!("Bearer {api_key}"))
         .send()
         .await?;
 

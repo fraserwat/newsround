@@ -27,8 +27,7 @@ async fn fetch_top_stories() -> Result<Vec<Value>, StoryFetchError> {
 
 async fn fetch_story_content(story_id: &Value) -> Result<Option<Story>, StoryFetchError> {
     let hn_top_story_url = format!(
-        "https://hacker-news.firebaseio.com/v0/item/{}.json",
-        story_id
+        "https://hacker-news.firebaseio.com/v0/item/{story_id}.json"
     );
     let story_json = fetch::fetch_json(&hn_top_story_url).await.unwrap();
     
@@ -47,7 +46,7 @@ async fn fetch_story_content(story_id: &Value) -> Result<Option<Story>, StoryFet
 
 pub async fn process_top_stories() -> Result<Story, StoryFetchError> {
     let top_stories = fetch_top_stories().await?;
-    for story_id in top_stories.iter() {
+    for story_id in &top_stories {
         if let Some(story) = fetch_story_content(story_id).await? {
             if !story.content.is_empty() {
                 return Ok(story);

@@ -56,7 +56,7 @@ fn clean_html_content(input: &str) -> String {
     // Truncate at the last full stop before an ellipsis if present.
     if let Some(ellipsis_pos) = result.find("...") {
         if let Some(last_period) = result[..ellipsis_pos].rfind('.') {
-            result = result[..last_period + 1].to_string();
+            result = result[..=last_period].to_string();
         }
     }
 

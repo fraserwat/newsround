@@ -14,10 +14,10 @@ impl Story {
     // Define a generic default Story creator function
     pub fn default_story(source: NewsSource) -> Story {
         Story {
-            title: "".to_string(),
-            url: "".to_string(),
+            title: String::new(),
+            url: String::new(),
             news_source: source,
-            content: "".to_string(),
+            content: String::new(),
         }
     }
 }

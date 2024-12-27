@@ -15,7 +15,7 @@ pub async fn fetch_bandcamp_daily() -> Result<Story, Box<dyn Error>> {
             let slug: String = base_url.to_string().replace("https://daily.bandcamp.com", "");
 
             if let Ok(Some(daily_url)) = bandcamp::get_latest_entry_url(&webpage, &slug) {
-                let url = format!("{}{}", base_url, daily_url);
+                let url = format!("{base_url}{daily_url}");
                 let daily_html = fetch::get_html_body(&url).await?;
 
                 match bandcamp::get_latest_title_paragraph(&daily_html) {
@@ -28,7 +28,7 @@ pub async fn fetch_bandcamp_daily() -> Result<Story, Box<dyn Error>> {
                         })
                     },
                     Err(e) => {
-                        println!("{:?}", e);
+                        println!("{e:?}");
                     }
                 }
             }
