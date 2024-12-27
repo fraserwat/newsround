@@ -32,7 +32,7 @@ async fn open_ai_api_call(params: serde_json::Value) -> Result<String, Box<dyn E
         let response_text = response.text().await?;
         let parsed_response: OpenAIResponse = serde_json::from_str(&response_text)?;
         // Check if there is at least one choice and message
-        if let Some(first_choice) = parsed_response.choices.get(0) {
+        if let Some(first_choice) = parsed_response.choices.first() {
             // Return the message content
             Ok(first_choice.message.content.clone())
         } else {

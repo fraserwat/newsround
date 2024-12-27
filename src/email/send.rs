@@ -38,6 +38,6 @@ pub async fn send_email(subject: String, html_content: String) -> Result<(), Box
     } else {
         let error_msg = format!("Failed to send email: {:?}", response.status());
         println!("Response body: {}", response.text().await?);
-        return Err(error_msg.into());
+        Err(error_msg.into())
     }
 }

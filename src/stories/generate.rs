@@ -71,13 +71,13 @@ pub async fn generate_story_vector() -> Vec<Story> {
         construct_financialtimes()
     );
 
-    let stories = vec![hackernews, novara, bandcamp, ft]
+    
+    vec![hackernews, novara, bandcamp, ft]
         .into_iter()
         .map(|mut story| {
             // Get rid of weird HTML artefacts in the email text.
             story.content = clean_html_content(&story.content);
             story
         })
-        .collect::<Vec<Story>>();
-    stories
+        .collect::<Vec<Story>>()
 }
