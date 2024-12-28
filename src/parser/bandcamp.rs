@@ -23,10 +23,8 @@ pub fn get_latest_entry_url(html: &str, slug: &str) -> Result<Option<(String, St
         .map(str::trim_start)
         .filter(|s| !s.is_empty())
         .collect();
-    let date = date_vec.last()
-        .ok_or("No date found in elements")?
-        .to_string();
-    println!("{:#?}", date);
+    let date = (*date_vec.last()
+        .ok_or("No date found in elements")?).to_string();
 
     // Return the URL and publication date
     match url_option {
